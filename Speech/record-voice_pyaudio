@@ -1,0 +1,37 @@
+"""PyAudio to record a few seconds of audio and save to a wave file.
+
+Disclaimer: I do not remember where I took this info, if it was a tutorial or just documentation on the internet """
+
+import wave
+import sys
+import pyaudio
+import time
+
+CHUNK = 1024 #  the number of audio frames to read/write at a time
+FORMAT = pyaudio.paInt16 # paInt16 represents 16-bit signed integers
+CHANNELS = 1 if sys.platform == 'darwin' else 2 # 1 for mono, 2 for stereo
+RATE = 44100
+RECORD_SECONDS = 10
+
+counter = RECORD_SECONDS  # counter variable to keep track of remaining seconds
+
+with wave.open('output.wav', 'wb') as wf:
+    p = pyaudio.PyAudio()
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+
+    stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
+
+    print('Recording...')
+    start_time = time.time()  # Record the start time
+    while counter > 0:
+        wf.writeframes(stream.read(CHUNK))
+        counter = int(RECORD_SECONDS - (time.time() - start_time))  # Calculate remaining seconds
+        print(f"Seconds: {counter}", end='\r')  # Print the remaining seconds
+    print('\nDone')
+
+    stream.close()
+    p.terminate()
+
+
