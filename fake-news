@@ -1,0 +1,42 @@
+## Tutorial: https://www.youtube.com/watch?v=ZE2DANLfBIs
+
+# TODO download data from : https://github.com/lutzhamel/fake-news/blob/master/data/fake_or_real_news.csv
+import numpy as np
+import pandas as pd 
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer # represent words/sentences as numbers
+
+# TF-IDF: TERMF FREQUENCY - Inverse Doc Frequency (2 metrics)
+from sklearn.svm import LinearSVC # import linear regression, SVM
+
+data = pd.read_csv("fake_or_real_news.csv")
+data["fake"] = data["label"].apply(lambda x: 0 if x =="REAL" else 1)
+# it is not worth doing a drop like this, because we are not going to use these labels anyway
+data = data.drop("label", axis=1)
+
+x,y = data["text"], data["fake"] # I have 1 feature, and 1 target value
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
+
+print("x_train: ", len(x_train))
+print("y train: ", len(y_train))
+
+vectorizer = TfidfVectorizer(stop_words= "english", max_df=0.7)
+
+# for each text, we have the vectorized data
+x_train_vectorized = vectorizer.fit_trainsform(x_train)
+x_test_vectorized = vectorizer.fit_trainsform(x_test)
+
+clf = LinearSVC()
+clf.fit(x_train_vectorized, y_train)
+print("Accuracy: ", clf.score(x_test_vectorized,y_test )) 
+
+# for other files, not the one I have used:
+
+with open("mytext.txt", "w") as f:
+    f.write(x_test.iloc[10]) # part of data
+with open("mytext.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+
+vectorized_text = vectorizer.transform([text]) # we pass a collection
+print("predictions for my new doc: ", clf.predict(vectorized_text)) # this result should be the same as: print(y_test.iloc[10])
