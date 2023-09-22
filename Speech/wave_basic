@@ -1,0 +1,28 @@
+""" Plot audio waves - Speech
+pip install wave
+pip install numpy
+pip install matplotlib
+
+"""
+
+import wave
+
+import matplotlib.pyplot as plt
+import sys
+import numpy as np
+
+wav = wave.open("C:/Users/User/myrecording.mp3", "r") # my path
+raw = wav.readframes(-1) # todos los frames del audio serán leídos
+raw = np.frombuffer(raw, "int16") # para hacer un array del speech raw
+sampleRate = wav.getframerate()
+
+if wav.getnchannels() ==2:
+    print("Stereo Files are not supported. Use Mono File")
+    sys.exit(0)
+
+# plot the wave form
+Time = np.linspace(0,len(raw)/sampleRate, num = len(raw))
+plt.title("Waveform of Wave File")
+plt.plot(Time, raw, color="blue") # Elijo los colores
+plt.ylabel("Amplitude")
+plt.show() # to display the graph
