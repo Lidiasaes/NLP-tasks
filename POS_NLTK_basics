@@ -1,0 +1,21 @@
+import nltk
+
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
+import nltk
+
+def pos_tag(text):
+    # Tokenize the text into words
+    tokens = nltk.word_tokenize(text)
+    
+    # Perform POS tagging
+    tagged_words = nltk.pos_tag(tokens)
+    
+    # Print the tagged words
+    for word, tag in tagged_words:
+        print(word, tag)
+
+# Example usage
+text = "I want to tag the parts of speech in this sentence."
+pos_tag(text)
