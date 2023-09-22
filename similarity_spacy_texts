@@ -1,0 +1,116 @@
+
+# Tutorial: https://www.youtube.com/watch?v=y-EjAuWdZdI
+# similarity between texts 
+# pip install spacy
+# download the language model: python -m spacy download  en_core_web_lg
+
+import spacy
+nlp = spacy.load("en_core_web_lg")
+
+
+# OPTION 1: basic
+w1 = "red"
+w2 = "walking"
+w3= "yellow"
+w4="colour"
+
+ 
+w1 = nlp.vocab[w1]
+w2 = nlp.vocab[w2]
+w3 = nlp.vocab[w3]
+w4 = nlp.vocab[w4]
+
+# cosine similarity 
+print(w1.similarity(w2)) # a value between 0- 1 
+print(w1.similarity(w1)) #max of 1
+print(w1.similarity(w3))
+
+
+
+# another example
+w1 = "wheater"
+w2 = "whether"
+w1 = nlp.vocab[w1]
+w2 = nlp.vocab[w2]
+print(w1.similarity(w2)) # different meaning, but when writing them, they are very similar
+
+
+
+# OPTION 2: EASIER
+w1 = "wheater"
+w2 = "whether"
+w1 = nlp(w1)
+w2 = nlp(w2)
+print(w1.similarity(w2))
+
+
+
+
+
+# ADVANCED: 
+s1 = nlp("I believe in the god of the Bible")
+s2 = nlp("I do not believe in any god at all")
+s3= nlp("there is somethign else guiding the world")
+
+
+print(s1.similarity(s2))
+print(s1.similarity(s3))
+
+
+#### EXTRA
+
+# compare different texts and decide to compare only nouns, adjectives etc
+s1= nlp("I play basketball in this awful arena")
+s2 =nlp("I play piano in this red room ")
+s3= nlp("I repair the piano in this ugly room")
+
+# what is the topic they are talking about? Let's filter them
+s1_verbs=  " ".join([token.lemma_ for token in s1 if token.pos_=="VERB"]) # pos_ is for position
+s1_nouns=  " ".join([token.lemma_ for token in s1 if token.pos_=="NOUN"])
+s1_adj=  " ".join([token.lemma_ for token in s1 if token.pos_=="ADJ"])
+
+print(s1_adj)
+print(s1_nouns)
+print(s1_verbs)
+
+
+# We can do the same for the rest of the texts, here, sentences 
+
+s2_verbs=  " ".join([token.lemma_ for token in s2 if token.pos_=="VERB"]) # pos_ is for position
+s2_nouns=  " ".join([token.lemma_ for token in s2 if token.pos_=="NOUN"])
+s2_adj=  " ".join([token.lemma_ for token in s2 if token.pos_=="ADJ"])
+
+print(s2_adj)
+print(s2_nouns)
+print(s2_verbs)
+
+
+# and for sentence 3
+
+s3_verbs=  " ".join([token.lemma_ for token in s3 if token.pos_=="VERB"]) # pos_ is for position
+s3_nouns=  " ".join([token.lemma_ for token in s3 if token.pos_=="NOUN"])
+s3_adj=  " ".join([token.lemma_ for token in s3 if token.pos_=="ADJ"])
+
+print(s3_adj)
+print(s3_nouns)
+print(s3_verbs)
+
+
+# verbs similarity of those 3 texts
+print(f"{s1} and {s2} VERBS: {nlp(s1_verbs).similarity(nlp(s2_verbs))}")
+print(f"{s1} and {s3} VERBS: {nlp(s1_verbs).similarity(nlp(s3_verbs))}")
+print(f"{s2} and {s3} VERBS: {nlp(s2_verbs).similarity(nlp(s3_verbs))}")
+
+
+# adjectives similarity of those 3 texts
+print(f"{s1} and {s2} ADJECTIVES: {nlp(s1_adj).similarity(nlp(s2_adj))}")
+print(f"{s1} and {s3} ADJECTIVES: {nlp(s1_adj).similarity(nlp(s3_adj))}")
+print(f"{s2} and {s3} ADJECTIVES: {nlp(s2_adj).similarity(nlp(s3_adj))}")
+
+
+# noun similarity of those 3 texts
+print(f"{s1} and {s2} NOUNS: {nlp(s1_nouns).similarity(nlp(s2_nouns))}")
+print(f"{s1} and {s3} NOUNS: {nlp(s1_nouns).similarity(nlp(s3_nouns))}")
+print(f"{s2} and {s3} NOUNS: {nlp(s2_nouns).similarity(nlp(s3_nouns))}")
+
+
