@@ -1,0 +1,119 @@
+# tutorial: https://www.youtube.com/watch?v=tEV_Jtmx2cc
+
+# TODO: download data, the same as fake or real news.csv
+
+import numpy as np
+import pandas as pd
+
+# pip install torch
+# pip install tensorflow
+
+
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+# text= """ a lot of sentences""" # this is info to build the model, so that it learns which word goes after which
+import random
+import pickle
+from nltk.tokenize import RegexpTokenizer
+import tensorflow as tf
+# import keras
+
+from keras import models 
+from keras.models import Sequential, load_model
+from keras.layers import LSTM, Dense, Activation
+from keras.optimizers import RMSprop
+
+text_df = pd.read_csv("C:/Users/User/OneDrive/Desktop/APRENDER/Python/data_reddit_Australia/data_Australia.csv")
+print(text_df)
+
+text = list(text_df.text.values) # I take all the texts and get a list out of them
+joined_text = " ".join(text) # with white spaces
+
+#since the text is too much, we are going to get a smaller part
+partial_text = joined_text[:10000]
+tokenizer = RegexpTokenizer(r"\w+")
+tokens = tokenizer.tokenize(partial_text.lower()) 
+print(tokens) # list of individual words we have
+
+unique_tokens= np.unique(tokens) # to avoid duplicates
+
+# create a dictionary where each token will have a certain index
+unique_token_index = {token: idx for idx, token in enumerate(unique_tokens)}
+
+n_words = 10 # next 10 words; which words are we going to look at when predicting the next word? the last one?
+input_words=[]
+next_words= []
+
+
+for i in range(len(tokens) - n_words): # to avoid going to the end
+    input_words.append(tokens[i:i + n_words])
+    next_words.append(tokens[i+ n_words])
+print("next word may always  be 1: ", next_words)
+print("this is a collection of words", input_words)
+
+
+x = np.zeros((len(input_words), n_words, len(unique_tokens)), dtype=bool)
+y = np.zeros((len(next_words), len(unique_tokens)), dtype=bool)
+
+print("x ", x)
+print("y ", y) # 1 single word
+
+# we go to all the samples
+for i, words in enumerate(input_words):
+    # to to all the words per sample
+    for j,word in enumerate(words):
+        # go to the sample position and take the word, map it with its index and set it to 1
+        x[i, j,unique_token_index[word]] =1
+    y[i,unique_token_index[next_words[i]]] = 1
+
+model = Sequential()
+model.add(LSTM(128, input_shape=(n_words, len(unique_tokens)), return_sequences=True))
+model.add(LSTM(128))
+model.add(Dense(len(unique_tokens)))
+model.add(Activation("softmax")) # to get probability for each word
+
+model.compile(loss="categorical_crossentropy", optimizer= RMSprop(learning_rate=0.01, metrics=["Accuracy"]))
+model.fit(x,y,batch_size= 128, epochs=10, shuffle=True)
+
+# accuracy solo nos indica que es buena con el data que le hemos dado, pero no implica que fuera de esto, funione
+
+model.save("mymodel.h5")
+# si quiero cargarlo: model = load_model("mymodel.h5")
+
+def predict_next_word(input_text, n_best):
+    input_text= input_text.lower()
+    x = np.zeros((1,n_words, len(unique_tokens)))
+    for i, word in enumerate(input_text.split()):
+        x[0,i, unique_token_index[word]]
+
+    predictions = model.predict(x)[0]
+    return np.argpartition(predictions, -n_best)[-n_best:]
+
+
+possible = predict_next_word("I will have to look into this thing because I", 5)
+print(possible) # I get an array 
+print([unique_tokens[idx] for idx in possible]) # now I get the lexic, that it, words
+
+# the more data you give the model, the more accurate it is
+
+
+def generate_text(input_text, text_length, creativity=3):
+    word_sequence= input_text.split() # to get a list of words
+    current = 0
+    for _ in range(text_length):
+        sub_sequence = " ".join(tokenizer.tokenize(" ".join(word_sequence).lower())[current:current+n_words])
+        try: 
+            choice = unique_tokens[random.choice(predict_next_word(sub_sequence, creativity))]
+        except:
+            choice = random.choice(unique_tokens)
+        word_sequence.append(choice)
+        current += 1
+    return " ".join(word_sequence)
+
+generate_text("I will have to look into this thing because I", 100, 5)
+
+model = load_model("model.h5")
+
+
+
