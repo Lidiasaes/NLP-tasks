@@ -1,0 +1,8 @@
+### NER
+#pip install spacy and other modules (e.g.'en_core_web_sm')
+import spacy
+nlp = spacy.load('en_core_web_sm')
+text = "The head office of Google is in California"
+document = nlp(text) 
+for ent in document.ents:
+    print(ent.text, ent.start_char, ent.end_char, ent.label_)
