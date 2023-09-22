@@ -1,0 +1,111 @@
+## Disclaimer: I do not remember from where I picked this from, if it was basic documentation in NLTK, or any tutorial. 
+
+
+import gensim
+from gensim import corpora
+from gensim.models.ldamodel import LdaModel
+from nltk.corpus import stopwords
+import string
+
+
+
+#  data
+data = ["""ChatGPT: New AI chatbot has everyone talking to it
+
+A new chatbot has passed one million users in less than a week, the project behind it says.
+
+ChatGPT was publicly released on Wednesday by OpenAI, an artificial intelligence research firm whose founders included Elon Musk.
+
+But the company warns it can produce problematic answers and exhibit biased behaviour.
+
+Open AI says it's "eager to collect user feedback to aid our ongoing work to improve this system".
+
+ADVERTISEMENT
+
+ChatGPT is the latest in a series of AIs which the firm refers to as GPTs, an acronym which stands for Generative Pre-Trained Transformer.
+
+To develop the system, an early version was fine-tuned through conversations with human trainers.
+
+The system also learned from access to Twitter data according to a tweet from Elon Musk who is no longer part of OpenAI's board. The Twitter boss wrote that he had paused access "for now".
+
+The results have impressed many who've tried out the chatbot. OpenAI chief executive Sam Altman revealed the level of interest in the artificial conversationalist in a tweet.
+
+Skip twitter post by Sam Altman
+Allow Twitter content?
+
+This article contains content provided by Twitter. We ask for your permission before anything is loaded, as they may be using cookies and other technologies. You may want to read Twitter’s cookie policy, external and privacy policy, external before accepting. To view this content choose ‘accept and continue’.
+
+Accept and continue
+The BBC is not responsible for the content of external sites.
+End of twitter post by Sam Altman
+The project says the chat format allows the AI to answer "follow-up questions, admit its mistakes, challenge incorrect premises and reject inappropriate requests"
+
+A journalist for technology news site Mashable who tried out ChatGPT reported it is hard to provoke the model into saying offensive things.
+
+
+Mike Pearl wrote that in his own tests "its taboo avoidance system is pretty comprehensive".
+
+However, OpenAI warns that "ChatGPT sometimes writes plausible-sounding but incorrect or nonsensical answers".
+
+Training the model to be more cautious, says the firm, causes it to decline to answer questions that it can answer correctly.
+
+Why the rise of AI art stirs fierce debate
+How human-like are the most sophisticated chatbots?
+Google engineer says AI system may have feelings
+Briefly questioned by the BBC for this article, ChatGPT revealed itself to be a cautious interviewee capable of expressing itself clearly and accurately in English.
+
+Did it think AI would take the jobs of human writers? No - it argued that "AI systems like myself can help writers by providing suggestions and ideas, but ultimately it is up to the human writer to create the final product".
+
+Asked what would be the social impact of AI systems such as itself, it said this was "hard to predict".
+
+Had it been trained on Twitter data? It said it did not know.
+
+Only when the BBC asked a question about HAL, the malevolent fictional AI from the film 2001, did it seem troubled.
+
+An error message produced by ChatGPT in response to the question "Was HAL innocent?"
+IMAGE SOURCE,OPENAI/BBC
+Image caption,
+A question ChatGPT declined to answer - or maybe just a glitch
+Although that was most likely just a random error - unsurprising perhaps, given the volume of interest.
+
+Its master's voice
+Other firms which opened conversational AIs to general use, found they could be persuaded to say offensive or disparaging things.
+
+Many are trained on vast databases of text scraped from the internet, and consequently they learn from the worst as well as the best of human expression.
+
+Meta's BlenderBot3 was highly critical of Mark Zuckerberg in a conversation with a BBC journalist.
+
+In 2016, Microsoft apologised after an experimental AI Twitter bot called "Tay" said offensive things on the platform.
+
+And others have found that sometimes success in creating a convincing computer conversationalist brings unexpected problems.
+
+Google's Lamda was so plausible that a now-former employee concluded it was sentient, and deserving of the rights due to a thinking, feeling, being, including the right not to be used in experiments against its will.
+
+Jobs threat
+ChatGPT's ability to answer questions caused some users to wonder if it might replace Google.
+
+Others asked if journalists' jobs were at risk. Emily Bell of the Tow Center for Digital Journalism worried that readers might be deluged with "bilge".    """]
+
+
+
+
+data = [doc.lower() for doc in data]
+
+# tokenize data and remove stopwords
+stop_words = set(stopwords.words('english') + list(string.punctuation))
+tokenized_data = [[word for word in doc.lower().split() if word not in stop_words] for doc in data]
+
+
+
+# create a dictionary from the data
+dictionary = corpora.Dictionary(tokenized_data)
+
+# convert the tokenized data into bag of words (BOW) format
+corpus = [dictionary.doc2bow(doc) for doc in tokenized_data]
+
+# train the LDA model
+lda_model = LdaModel(corpus=corpus, id2word=dictionary, num_topics=2)
+
+# Print the topics
+for idx, topic in lda_model.print_topics(num_words=10):
+    print('Topic: {} \nWords: {}'.format(idx, topic))
