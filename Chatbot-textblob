@@ -1,0 +1,71 @@
+# Tutorial: https://www.youtube.com/watch?v=CZWN6SyocXA
+# create a chatbot 
+
+
+import random
+# pip install textblob
+from textblob import TextBlob
+
+# 1) Name and nickname conversation
+print("Hello human, what is your name?")
+name= input()
+print("Do you have a nickname? yes or y/ no or n")
+ans=input()
+if ans.lower() == "yes" or ans.lower() == "y":
+    nickname= input("What is your nickname? ")
+    print("Good to meet you, ", nickname)
+else:
+    nickname = name[-1] + "y"
+    print("I will call you "+ nickname)
+
+
+# 2) Greeting selection
+import random
+questions = [ 
+    "So " + nickname +"how are you today? ",
+    "Howdy " + nickname +", how are you feeling?",
+    "What's up" + nickname+ "?",
+    "Greetings" + nickname +", are you well?",
+    "How are things going" +nickname+ "?"
+]
+print(random.choice(questions))
+
+ans = input()
+ans = ans.lower()
+if "great" in ans or "good" in ans or "well" in ans or "amazing" in ans:
+    print("I am glad!")
+else:
+    print("Oh, sorry to hear that")
+
+
+# 3) random topic opinion 3 or 4 questions
+topics= [ "football", "Melbourne", "AFL", "Endgame", "Computers", "Computer games", "Python", "life"]
+questions = [ "what is your take on ", "what do you think about ", "how do you feel about ", "I would like your opinion on ", "What do you reckon about "]
+
+for i in range(0, random.randint(3,4)):
+    question = random.choice(questions)
+    questions.remove(question)
+    topic = random.choice(topics)
+    topics.remove(topic)
+    print(question + topic + "?")
+    ans = input()
+    blob= TextBlob(ans)
+
+    if blob.polarity > 0.5:
+        print("OMG you really love " + topic) 
+    elif blob.polarity > 0.1:
+        print("Well, you clearly like " + topic) 
+    elif blob.polarity < -0.5:
+        print("Woof, you totally hate" + topic )
+    else:
+        print("That is a very neutral view on " + topic)
+
+    if blob.subjectivity > 0.6:
+        print("and you are so biased")
+    elif blob.subjectivity > 0.3:
+        print("and you are a bit biased")
+    else:
+        print("and you are quite objective")
+
+
+# ####
