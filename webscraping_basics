@@ -1,0 +1,41 @@
+
+from bs4 import BeautifulSoup
+#pip install lxml
+import requests
+
+# extraer el título y  la info del guión de Titanic: https://subslikescript.com/movie/Titanic-120338
+
+website =  "https://subslikescript.com/movie/Titanic-120338"  # mi url
+result = requests.get(website) # se envía solicitud a la página
+content= result.text # paso la respuesta de la página a texto
+
+# importante, es lo que me permite localizar elementos en pág web
+soup = BeautifulSoup(content, "lxml") # lxml es el parser
+
+# print(soup) # puedo runear esto, pero está todo el ´codigo html mezclado sin espacios
+# print(soup.prettify()) # me muestra el código el html en mejor formato
+
+# cómo ir directamente al elemento que quiero: ir a la web, inspeccionar elemento y ver el código html que tiene detrás
+
+# si solo quiero encontrar un element uso find; si quiero encontrar todos, findall
+box= soup.find("article", class_="main-article") # pongo el nombre del tag y leugo el atributo
+print(box)
+titulo = soup.find("h1").get_text() # busco el título
+print(titulo) 
+
+transcript = soup.find("div", class_="full-script").get_text() # tag, luego clase
+# print(transcript) # va saltando de línea en medio de una frase de forma aleatorria
+
+# lo modifico; strip borra espacios en blanco en cadenas de texto, así los elimino y puedo tener las frases completas
+# los saltos de línea los cambio por espacios
+  
+transcript = soup.find("div", class_="full-script").get_text(strip=True, separator=" ") # tag, luego clase
+print(transcript)
+
+
+# Exportar esto a un archivo .txt
+with open(f"{titulo}.txt", "w",encoding="utf-8") as file: # creo un archivo que se llame como el titulo
+    file.write(transcript) # escribo el transcript dentro del archivo uqe he creado
+
+with open("C:\\Users\\User\\OneDrive\\Desktop\\titanicprueba.txt", "w", encoding="utf-8") as file: # creo un archivo que se llame como el titulo
+    file.write(transcript) # escribo el transcript dentro del archivo uqe he creado
