@@ -1,0 +1,82 @@
+# Tutorial: https://www.youtube.com/watch?v=jVPd7lEvjtg
+# His blog: https://towardsdatascience.com/bert-for-measuring-text-similarity-eec91c6bf9e1
+# Author: James Briggs
+
+
+
+sentences = [
+    "Three years later, the coffin was still full of Jello.",
+    "The fish dreamed of escaping the fishbowl and into the toilet where he saw his friend go.",
+    "The person box was packed with jelly many dozens of months later.",
+    "He found a leprechaun in his walnut shell."
+]
+
+model_name = "sentence-transformers/bert-base-nli-mean-tokens"
+
+
+from transformers import AutoTokenizer, AutoModel
+import torch
+
+#initialize tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model= AutoModel.from_pretrained(model_name)
+
+tokens = {"input_ids":[], "attention_mask":[]}
+
+# this will return a dictionary with input_ids  and attention mask for each sentence 
+for sentence in sentences:
+    new_tokens= tokenizer.encode_plus(sentence,max_length=128, truncation=True,padding="max_length", return_tensors="pt")
+    tokens["input_ids"].append(new_tokens["input_ids"][0])
+    tokens["attention_mask"].append(new_tokens["attention_mask"][0])
+
+print(tokens["input_ids"])
+print(tokens["attention_mask"])
+
+tokens["input_ids"] = torch.stack(tokens["input_ids"])
+tokens["attention_mask"] = torch.stack(tokens["attention_mask"])
+
+#adding new dimension
+torch.Tensor
+
+print("type of tokens ids", type(tokens["input_ids"]))
+print("shape of input ids", tokens["input_ids"].shape)
+outputs = model(**tokens)
+print("outputs ", outputs)
+print("outputs keys ", outputs.keys())
+
+
+embeddings = outputs.last_hidden_state
+print(embeddings.shape) # 6 sentences, 128 tokens, 768 hidden state dimension
+
+attention = tokens["attention_mask"]
+print(attention.shape)
+
+print("attention unsqueeze", attention.unsqueeze(-1).shape)
+
+print("attention unsqueeze", attention.unsqueeze(-1).expand(embeddings.shape).shape)
+
+mask = attention.unsqueeze(-1).expand(embeddings.shape).float()
+mask_embeddings = embeddings * mask
+print(embeddings) 
+
+print(mask_embeddings)
+
+# we want to convert this into 1 only  number
+print(mask_embeddings.shape)
+
+summed = torch.sum(mask_embeddings, 1) # 1 is the dimension of number "6" want
+counts = torch.clamp(mask.sum(1), min= 1e-9) #dimension 1; min sirve para que no hay an ada dividio por 0
+
+print("shape of counts", counts.shape)
+
+mean_pooled = summed / counts
+print(mean_pooled.shape)
+print(mean_pooled)
+
+# now we are going to compare mean_pooled and check which one gets the highest cosine similarity 
+
+from sklearn.metrics.pairwise import cosine_similarity
+mean_pooled = mean_pooled.detach().numpy()
+
+# I am comparing sentence 1 (index 0), with the rest of the sentences
+cosine_similarity( [mean_pooled[0]], mean_pooled[1:] ) 
