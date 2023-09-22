@@ -1,0 +1,45 @@
+# I do not remember the tutorial it comes from, but I do not own these rights.
+
+import nltk
+from nltk import sent_tokenize #tokenize sentences
+from nltk import word_tokenize #tokenize words
+from nltk import ngrams
+#from nltk import unigrams
+
+
+parag= 'Hi Guys. Welcome to Intellipaat. This is a blog on the NLP interview questions and answers.'
+sent= 'I am Liu and I am trying to learn nltk packages'
+print(sent_tokenize(parag))
+print(word_tokenize(sent))
+
+
+# use n-grams
+text = "Top 30 NLP interview questions and answers"
+#list(nltk.unigrams(text))
+list(nltk.ngrams(text,1)) # 1 = n, this is 1-gram
+list(nltk.ngrams(text,2)) # 2 = n, this is 2-gram
+
+
+# Lemmatization
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+
+sent = 'The laughs you two heard were triggered by memories of his own high j-flying exits for moving beasts'
+sent_tokenized = sent.split(" ")
+lemmatizer = WordNetLemmatizer()
+words = [lemmatizer.lemmatize(word) for word in sent_tokenized]
+
+# pos-tagging
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
+stop_words = set(stopwords.words('english'))
+txt = "Sara, Miriam, and Antonio are good friends."
+#tokemize
+tokenized_text = sent_tokenize(txt)
+for i in tokenized_text:
+    wordsList = nltk.word_tokenize(i)
+    wordsList = [w for w in wordsList if not w in stop_words]
+
+#postagger
+tagged_words = nltk.pos_tag(wordsList)
+print(tagged_words)
