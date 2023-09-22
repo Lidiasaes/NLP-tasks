@@ -1,0 +1,45 @@
+""" 
+Simple Sentiment Text Analysis
+
+pip install nltk
+pip install textblob
+pip install newspaper3k
+"""
+
+from textblob import TextBlob
+from newspaper import Article
+
+""" 
+This first option is to do sentiment analysis to a newspaper, it does not particularly work well
+""" 
+
+url = "https://www.bbc.com/news/technology-65779181"
+url2="https://www.bbc.com/news/uk-65746524"
+
+article = Article(url)
+
+article.download()
+article.parse()
+article.nlp() # preparar para NLP
+
+text = article.text
+print(text)
+
+
+blob = TextBlob(text)
+sentiment = blob.sentiment.polarity # de -1 a 1
+print("Sentiment polarity is ", sentiment)
+
+
+""" 
+This second part is to read a .txt of your own and do sentiment-analysis and see how it works. In my case, it did not work particularly well
+""" 
+from textblob import TextBlob
+
+with open("C:/Users/User/OneDrive/Desktop/review_negativa.txt", "r") as f:
+    text = f.read()
+
+blob =TextBlob(text)
+sentiment= blob.sentiment.polarity
+print("Sentiment should be negative <0, but it says: ", sentiment)
+
