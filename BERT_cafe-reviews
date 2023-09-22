@@ -1,0 +1,62 @@
+# Tutorial: https://github.com/nicknochnack/BERTSentiment/blob/main/Sentiment.ipynb
+# Author: Nicholas Renotte
+# I followed this tutorial to understand how transformers worked in a pandas dataframe.
+
+# 1) INSTALL AND IMPORT DEPENDENCIES
+# pip install transformers
+# in the official website of pytorch; pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+# pip install requests
+# pip install beautifulsoup4 
+# pip install pandas 
+# pip install numpy     
+
+import torch # pytorch
+import requests # grab data 
+from bs4 import BeautifulSoup
+from transformers import AutoTokenizer
+from transformers import AutoModelForSequenceClassification
+import re # regex functions to extract some comments
+import numpy as np
+
+# 2) INSTANTIATE MODEL
+# We have to download both the tokenizer and the model 
+tokenizer = AutoTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
+model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
+
+
+# 3) ENCODE AND CALCULATE SENTIMENT
+tokens = tokenizer.encode("It was good but could have been better", return_tensors="pt")
+result= model(tokens)
+result.logits
+int(torch.argmax(result.logits))+1
+
+# 4 ) COLLECT REVIEWS
+r = requests.get("https://www.yelp.com/biz/social-brew-cafe-pyrmont")
+soup = BeautifulSoup(r.text, "html.parser")
+regex = re.compile(".*comment*")
+results = soup.find_all("p", {"class": regex})
+reviews = [result.text for result in results]
+
+print(reviews)
+
+
+# 5) LOAD REVIEWS INTO DATAFRAME AND SCORE
+
+import pandas as pd
+df = pd.DataFrame(np.array(reviews), columns=["reviews"])
+df["reviews"].iloc[0]
+def sentiment_score(reviews):
+    tokens=tokenizer.encode(reviews,return_tensors="pt")
+    result= model(tokens)
+    return int(torch.argmax(result.logits))+1
+
+sentiment_score(df["reviews"].iloc[1])
+df["sentiment"] = df["reviews"].apply(lambda x: sentiment_score(x[:512]))
+df["reviews"].iloc[3] # I should get values from 1 to 5 (1 negative, 5 positive)
+
+print(df)
+
+# I can also sort values from higer to lower
+df_sorted = df.sort_values('sentiment', ascending=False)
+
+print("\ndf_sorted", df_sorted)
