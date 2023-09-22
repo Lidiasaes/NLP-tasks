@@ -1,0 +1,40 @@
+import numpy as np
+import spacy
+# !python -m spacy download es_core_news_lg
+
+# Función que obtiene una palabra a partir del identificador numérico que le asigna Spacy (Spacy asocia a cada palabra un identificador numérico único)
+def to_word(key):
+    return nlp.vocab.strings[key]
+
+# Función que obtiene el vector asociado a una palabra.
+def to_vector(word):
+    key = nlp.vocab.strings[word]
+    return np.asarray([nlp.vocab.vectors[key]])
+
+# Función para obtener los 10 identificadores de las palabras cuyos vectores son los más cercanos al vector dato.
+def similar10(vector):
+    [keys, rows, scores] = nlp.vocab.vectors.most_similar(vector, n=10)
+    # Convertimos los identificadores a palabras
+    words = []
+    for key in keys[0]:
+        words.append(to_word(key))
+    return words
+
+### Programa principal ###
+
+# Cargamos el modelo grande de noticias en español de Spacy
+nlp = spacy.load("es_core_news_lg")
+
+print("Palabras más cercanas \"semánticamente\" a \"trabajador\":\n")
+print(similar10(to_vector("trabajador")))
+
+print("A los vectores de \"trabajador\", le restamos los vectores de \"hombre\" y le sumamos los de \"mujer\":\n")
+print(similar10(to_vector("trabajador") + to_vector("mujer") - to_vector("hombre")))
+
+
+
+print("Palabras más cercanas a \"Madrid\":\n")
+print(similar10(to_vector("Madrid")))
+
+print("A los vectores de \"Madrid\" le restamos los de \"España\" y  le sumamos los de \"Portugal\":\n")
+print(similar10(to_vector("Madrid") - to_vector("España") + to_vector("Portugal")))
