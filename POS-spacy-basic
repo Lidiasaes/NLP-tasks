@@ -1,0 +1,17 @@
+import spacy
+
+# Load the English language model
+nlp = spacy.load("en_core_web_sm")
+
+def pos_tag(text):
+    # Process the text with spaCy
+    doc = nlp(text)
+    
+    # Iterate over the tokens in the document
+    for token in doc:
+        # Print the token and its POS tag
+        print(token.text, token.pos_)
+
+# Example usage
+text = "I want to tag the parts of speech in this sentence."
+pos_tag(text)
