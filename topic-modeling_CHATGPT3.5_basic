@@ -1,0 +1,62 @@
+"""
+pip install openai
+ """
+import openai 
+
+openai.api_key = "---------------------"
+openai.organization = "---------------------"
+
+
+def classify_topic(text):
+    # Define the prompt to send to the model
+    prompt = f"What is the topic of the following text in Spanish? Remove Spanish stopwords and function words in order to get the topic. The topic must be a Spanish complete noun\n\n{text}\n\nTopic:"
+    
+    # Generate a response using the GPT-3.5 model
+    response = openai.Completion.create(
+        engine='text-davinci-003',
+        prompt=prompt,
+        max_tokens=1,
+        n=1,
+        stop=None,
+        temperature=0.8
+    )
+
+    # Extract the generated topic from the response
+    topic = response.choices[0].text.strip()
+
+    return topic
+
+def generate_summary(text):
+    # Define the prompt to send to the model
+    prompt = f"Summarize the following Spanish text:\n\n{text}"
+
+    # Generate a response using the GPT-3.5 model
+    response = openai.Completion.create(
+        engine='text-davinci-003',
+        prompt=prompt,
+        max_tokens=100,
+        n=1,
+        stop=None,
+        temperature=0.8
+    )
+
+    # Extract the generated summary from the response
+    summary = response.choices[0].text.strip()
+
+    return summary
+
+
+
+# Read and classify topics of multiple .txt files
+file_paths = ['C:/Users/User/OneDrive/Desktop/Cursos Informática/UNIR_Introducción a RNN artificiales_Mario Barcala/DIA5_ChatGPT/Noticias/noticia1.txt', 
+              'C:/Users/User/OneDrive/Desktop/Cursos Informática/UNIR_Introducción a RNN artificiales_Mario Barcala/DIA5_ChatGPT/Noticias/noticia2.txt',
+              'C:/Users/User/OneDrive/Desktop/Cursos Informática/UNIR_Introducción a RNN artificiales_Mario Barcala/DIA5_ChatGPT/Noticias/noticia3.txt']
+
+for file_path in file_paths:
+    with open(file_path, 'r', encoding= "UTF-8") as file:
+        text = file.read()
+    
+    topic = classify_topic(text)
+    summary = generate_summary(text)
+
+    print(f"File: {file_path}\nTopic: {topic}\nSummary: {summary}\n")
