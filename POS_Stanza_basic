@@ -1,0 +1,19 @@
+import stanza
+
+def pos_tag(text):
+    # Load the English model
+    stanza.download("en")
+    nlp = stanza.Pipeline("en")
+    
+    # Process the text with Stanza
+    doc = nlp(text)
+    
+    # Iterate over the sentences and words in the document
+    for sentence in doc.sentences:
+        for word in sentence.words:
+            # Print the word and its POS tag
+            print(word.text, word.upos)
+
+# Example usage
+text = "I want to tag the parts of speech in this sentence."
+pos_tag(text)
