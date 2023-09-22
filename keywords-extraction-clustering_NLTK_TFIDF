@@ -1,0 +1,43 @@
+# key word clustering example
+# tutorial:  https://www.youtube.com/watch?v=GQ6OT2HyfPs
+
+import pandas as pd
+import numpy as np
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords # in this case, for English!!! 
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+# we get metrics from this module: keywords, words, count... etc
+
+from sklearn import cluster # cluster algorithm, it groups keywords
+
+stemmer = PorterStemmer()
+
+print(stemmer.stem("roofing"))
+print(stemmer.stem("accessories"))
+print(stemmer.stem("casas")) # it does not work for Spanish, it is because of the  plural s!
+print(stemmer.stem("beaux")) # it does not work for French
+
+
+sw= stopwords.words("english") # set language
+
+print(sw) # to look at wich words we are going to remove
+
+def tokenizer(keyword):
+    return [stemmer.stem(w) for w in keyword.split(" ")] # if there is a space between words, we split it
+
+
+keywords= ["best coffe shop of my life", "I love it", "I hated it"]
+
+tfidf= TfidfVectorizer(use_idf=False, norm=None) # count vectorizer
+
+print(tfidf.fit_transform(keywords).toarray()) # multidimensional array,I get vectors
+
+print(pd.DataFrame(tfidf.fit_transform(keywords).toarray(), index=keywords, columns= tfidf.get_feature_names_out()))
+
+tfidf= TfidfVectorizer(tokenizer=tokenizer, stop_words= sw) 
+x= pd.DataFrame(tfidf.fit_transform(keywords).toarray(), index=keywords, columns= tfidf.get_feature_names_out())
+print(x)
+
+c= cluster.AffinityPropagation() # it is not the best one, but it givesme an idea
+print(c.fit_predict(x)) #clustering keywords using thedata 
