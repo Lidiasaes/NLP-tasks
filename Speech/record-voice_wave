@@ -1,0 +1,30 @@
+"""
+Tutorial: https://www.youtube.com/watch?v=av8E8qLZswU
+"""
+
+import pyaudio
+import wave
+
+audio = pyaudio.PyAudio()
+stream = audio.open(format= pyaudio.paInt16, channels= 1, rate=44100, input=True, frames_per_buffer = 1024) #input True es que le estoy enviando un input por el portátil
+
+frames = []
+try: # Prepare a way to stop recording, in this case with a key of keyboard
+    while True:
+        data = stream.read(1024)
+        frames.append(data)
+except KeyboardInterrupt:
+    pass
+
+stream.stop_stream()
+stream.close()
+audio.terminate()
+
+#save sound file 
+sound_file = wave.open("myrecording.mp3", "wb") # .mp3 o wa
+sound_file.setnchannels(1) # pongo el mismo número de canales que antes
+sound_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+sound_file.setframerate(44100) # pongo el mismo valorque antes
+sound_file.writeframes(b''.join(frames)) # tenemos que unir las  frames con un binary empty string
+sound_file.close()
+ # ctrl+c  TO STOP RECORDING
