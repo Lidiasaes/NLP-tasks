@@ -1,0 +1,139 @@
+import nltk
+import spacy
+import stanza
+import pandas as pd
+
+"""  
+### Para STRING ####
+
+def pos_tag_comparison(text):
+    # Tokenize the text into words
+    tokens = nltk.word_tokenize(text)
+    
+    # Perform POS tagging using NLTK
+    nltk_tags = nltk.pos_tag(tokens)
+    
+    # Load the English language model in spaCy
+    spacy_nlp = spacy.load("en_core_web_sm")
+    
+    # Process the text with spaCy
+    spacy_doc = spacy_nlp(text)
+    
+    # Load the English model in Stanza
+    stanza.download("en")
+    stanza_nlp = stanza.Pipeline("en")
+    
+    # Process the text with Stanza
+    stanza_doc = stanza_nlp(text)
+    
+    # Create a list to store the results
+    results = []
+    
+    # Iterate over the tokens in the text
+    for token_idx, token in enumerate(tokens):
+        # Get the gold label from NLTK
+        nltk_word, nltk_label = nltk_tags[token_idx]
+        
+        # Get the predicted label from spaCy
+        spacy_word = spacy_doc[token_idx].text
+        spacy_label = spacy_doc[token_idx].pos_
+        
+        # Get the predicted label from Stanza
+        stanza_word = stanza_doc.sentences[0].words[token_idx].text
+        stanza_label = stanza_doc.sentences[0].words[token_idx].upos
+        
+        # Add the results to the list
+        results.append((token, nltk_label, spacy_label, stanza_label))
+    
+    # Create a DataFrame from the results
+    df = pd.DataFrame(results, columns=["Word", "NLTK Label", "SpaCy Label", "Stanza Label"])
+    
+    return df
+
+# Example usage
+text = "I want to tag the parts of speech in this sentence."
+df = pos_tag_comparison(text)
+print(df)
+
+"""
+
+
+
+##### PARA .TXT
+
+import nltk
+import spacy
+import stanza
+import pandas as pd
+
+def pos_tag_comparison(file_path):
+    # Read the input text file
+    with open(file_path, "r") as file:
+        text = file.read()
+    
+    # Tokenize the text into sentences
+    sentences = nltk.sent_tokenize(text)
+    
+    # Perform POS tagging using NLTK
+    nltk_tags = nltk.pos_tag_sents(nltk.word_tokenize(sent) for sent in sentences)
+    
+    # Load the English language model in spaCy
+    spacy_nlp = spacy.load("en_core_web_sm")
+    
+    # Process the text with spaCy
+    spacy_docs = [spacy_nlp(sent) for sent in sentences]
+    
+    # Load the English model in Stanza
+    stanza.download("en")
+    stanza_nlp = stanza.Pipeline("en")
+    
+    # Process the text with Stanza
+    stanza_docs = [stanza_nlp(sent) for sent in sentences]
+    
+    # Create a list to store the results
+    results = []
+    
+    # Iterate over the sentences
+    for sent_idx, sent in enumerate(sentences):
+        tokens = nltk.word_tokenize(sent)
+        # Get the gold labels from NLTK
+        nltk_tags_sent = nltk_tags[sent_idx]
+        
+        # Get the predicted labels from spaCy
+        spacy_doc = spacy_docs[sent_idx]
+        spacy_labels_sent = [token.pos_ for token in spacy_doc]
+        
+        # Get the predicted labels from Stanza
+        stanza_doc = stanza_docs[sent_idx]
+        stanza_labels_sent = [word.upos for sent in stanza_doc.sentences for word in sent.words]
+        
+        # Iterate over the tokens in the sentence
+        for token_idx, token in enumerate(tokens):
+            # Get the gold label from NLTK
+            nltk_word, nltk_label = nltk_tags_sent[token_idx]
+            
+            # Get the predicted label from spaCy
+            spacy_word = spacy_doc[token_idx].text
+            spacy_label = spacy_labels_sent[token_idx]
+            
+            # Get the predicted label from Stanza
+            stanza_word = stanza_doc.sentences[0].words[token_idx].text
+            stanza_label = stanza_labels_sent[token_idx]
+            
+            # Add the results to the list
+            results.append((token, nltk_label, spacy_label, stanza_label))
+    
+    # Create a DataFrame from the results
+    df = pd.DataFrame(results, columns=["Word", "NLTK Label", "SpaCy Label", "Stanza Label"])
+    
+    return df
+
+# Example usage
+file_path = "C:/Users/User/OneDrive/Desktop/Titanic (1997) - full transcript.txt"
+df = pos_tag_comparison(file_path)
+print(df)
+
+df.to_csv("C:/Users/User/OneDrive/Desktop/pos_tag_comparison.csv", index=False)
+
+### If you want to check the pos_tag_comparison.csv document, you can find it in the repository as well.
+
