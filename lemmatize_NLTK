@@ -1,0 +1,102 @@
+# Tutorial: https://colab.research.google.com/drive/1X5E_9OuY9LRiupkd0rxZKLVCWMrXPUBS
+
+
+
+import pandas as pd
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+nltk.download('averaged_perceptron_tagger')
+# Download the required NLTK data
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+text =""" MY TEXT  blabalbab bablalbabal
+
+
+ """"
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+import nltk
+import pandas as pd
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+# Load the text data
+with open('/content/drive/My Drive/Digital_Humanities/TASKS - LISAN/task4.txt/T1.txt', 'r') as f:
+    text = f.read()
+
+# Tokenize the text
+tokens = word_tokenize(text)
+
+# Remove stopwords
+stop_words = set(stopwords.words('english'))
+tokens = [token for token in tokens if token.lower() not in stop_words]
+
+# Perform lemmatization
+lemmatizer = WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(token) for token in tokens]
+
+# Get POS tags
+pos_tags = nltk.pos_tag(tokens)
+
+# Map POS tags to WordNet tags for lemmatization
+tag_map = {
+    'N': 'n',
+    'V': 'v',
+    'R': 'r',
+    'J': 'a'
+}
+wnl_tags = [tag_map.get(tag[0], 'n') for tag in pos_tags]
+
+# Perform lemmatization with WordNet tags
+lemmatized_words = [lemmatizer.lemmatize(token, wnl_tags[i]) for i, token in enumerate(tokens)]
+
+# Count word frequencies
+freq_dist = nltk.FreqDist(lemmatized_words)
+top_words = [word[0] for word in freq_dist.most_common(100000)]
+
+# Create the arrays
+original_words = top_words
+lemmatized_words = [lemmatizer.lemmatize(token, wnl_tags[i]) for i, token in enumerate(original_words)]
+frequencies = [freq_dist[word] for word in lemmatized_words]
+pos_tags = [tag[1] for tag in nltk.pos_tag(original_words)]
+
+# Zip the arrays together into tuples
+data = list(zip(original_words, lemmatized_words, frequencies, pos_tags))
+
+# Create a data frame
+df = pd.DataFrame(data, columns=['word', 'lemmatized_word', 'frequency', 'pos_tag'])
+
+print(df)
+
+df.to_csv('/content/drive/My Drive/Digital_Humanities/TASKS - LISAN/task4.txt/T1_lemma.csv', index=False)
+
+
+
+
+
+# option b
+
+
+
+# create arrays
+lemmatized_top_words = [lemmatizer.lemmatize(token) for token in top_words]
+frequencies = [freq_dist[word] for word in top_words]
+pos_tags = [tag[1] for tag in nltk.pos_tag(top_words)]
+
+# zip the arrays together into tuples
+data = list(zip(lemmatized_top_words, top_words, frequencies, pos_tags))
+
+# create data frame
+df = pd.DataFrame(data, columns=['lemmatized_word', 'word', 'frequency', 'pos_tag'])
+
+print(df)
