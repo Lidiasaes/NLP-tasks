@@ -1,0 +1,22 @@
+# extract keywords with BERT
+# tutorial: https://www.youtube.com/watch?v=Ung-SWAEngc
+
+
+# pip install nltk
+# pip install rake_nltk
+from rake_nltk import Rake
+
+input_text = """ I cannot believe I’m writing a review about sandwiches but we rently called into the new premises and orders some sandwiches and chips. When we got them the chips were beautiful home made chips but the sandwiches were the best we have ever had anywhere. The whole experience was a pleasure from start to finish
+
+
+"""
+input_text = input_text.replace("(", "").replace(")", "") 
+rake= Rake()
+rake.extract_keywords_from_text(input_text)
+print(rake.get_ranked_phrases()) 
+
+# try to improve this list
+
+keywords = rake.get_ranked_phrases()
+print(set([keyword for keyword in keywords if len(keyword.split()) > 1]))
+# I pick a set because I do not want repeated words
