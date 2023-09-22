@@ -1,0 +1,235 @@
+## Different lemmatizers
+## This was done in a Colaboratory environment 
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+"""#LEMMATIZER 1"""
+
+import nltk
+import pandas as pd
+from nltk.probability import FreqDist
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+nltk.download('punkt')
+
+# Download necessary resources
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+
+# Read the text file and tokenize the text
+with open('/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+tokens = word_tokenize(text)
+
+# Define a function to get POS tag information
+def get_wordnet_pos(tag):
+    if tag.startswith('N'):
+        return 'n'
+    elif tag.startswith('V'):
+        return 'v'
+    elif tag.startswith('J'):
+        return 'a'
+    elif tag.startswith('R'):
+        return 'r'
+    else:
+        return ''
+
+# Initialize the lemmatizer and POS tagger
+lemmatizer = WordNetLemmatizer()
+tagged = nltk.pos_tag(tokens)
+
+# Create a list of lemmas and normal words
+lemmas = []
+words = []
+for token, tag in tagged:
+    pos = get_wordnet_pos(tag)
+    lemma = lemmatizer.lemmatize(token.lower(), pos=pos) if pos else token.lower()
+    lemmas.append(lemma)
+    words.append(token.lower())
+
+# Create a frequency distribution of the lemmas
+fdist = FreqDist(lemmas)
+
+
+# Create a dataframe with the lemma, normal word, frequency, and POS tag information
+df = pd.DataFrame({'lemma': lemmas, 'word': words})
+
+
+df['frequency'] = df['lemma'].map(fdist)
+df['pos_tag'] = [tag for word, tag in tagged]
+
+# Print the first 10 rows of the dataframe
+
+pd.set_option('display.max_rows', None)
+
+print(df.head(12000))
+
+df.to_csv("/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1_lemmatizer_prueba.txt")
+
+"""#LEMMATIZER 2"""
+
+## SIMILAR TO VOYANT, BUT STILL DOES NOT PERFORM AS WELL AS VOYANT
+
+import nltk
+from nltk.probability import FreqDist
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from nltk.corpus import wordnet
+
+# Download necessary resources
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+
+# Define a function to get POS tag information
+def get_wordnet_pos(tag):
+    if tag.startswith('N'):
+        return 'n'
+    elif tag.startswith('V'):
+        return 'v'
+    elif tag.startswith('J'):
+        return 'a'
+    elif tag.startswith('R'):
+        return 'r'
+    else:
+        return ''
+
+# Ask the user to input a word
+input_word = input("Enter a word: ").lower()
+
+# Initialize the lemmatizer and POS tagger
+lemmatizer = WordNetLemmatizer()
+tagged = nltk.pos_tag(word_tokenize(input_word))
+
+# Get the base form of the input word
+pos = get_wordnet_pos(tagged[0][1])
+
+def get_wordnet_pos(treebank_tag):
+    if treebank_tag.startswith('J'):
+        return wordnet.ADJ
+    elif treebank_tag.startswith('V'):
+        return wordnet.VERB
+    elif treebank_tag.startswith('N'):
+        return wordnet.NOUN
+    elif treebank_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN # default to noun if no match
+
+
+
+base_form = lemmatizer.lemmatize(tagged[0][0].lower(), pos=pos) if pos else tagged[0][0].lower()
+
+# Tokenize and tag the text
+with open('/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+tokens = word_tokenize(text)
+tagged_tokens = nltk.pos_tag(tokens)
+
+# Filter the tagged tokens to include only those with the same base form as the input word
+filtered_tokens = [token for token, tag in tagged_tokens if lemmatizer.lemmatize(token.lower(), pos=get_wordnet_pos(tag)) == base_form]
+
+# Create a frequency distribution of the filtered tokens
+fdist = FreqDist(filtered_tokens)
+
+# Print the frequencies of the base form and other inflected forms of the input word
+print(f"{'Form':<10} {'Frequency':<10}")
+print(f"{base_form:<10} {fdist[base_form]:<10}")
+for form in lemmatizer.lemmatize(input_word, pos='v'):
+    if form != base_form:
+        print(f"{form:<10} {fdist[form]:<10}")
+
+
+
+"""#LEMMATIZER 3"""
+
+## IMPROVEMENT
+#'/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1.txt'
+import nltk
+from nltk.corpus import wordnet
+from nltk.probability import FreqDist
+import pandas as pd
+
+# Download necessary NLTK data
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+
+# Load text from file
+with open('/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+# Tokenize the text and tag the tokens with their part of speech
+tagged_tokens = nltk.pos_tag(nltk.word_tokenize(text))
+
+# Define a function to get the base form of a word using the WordNet lemmatizer
+def get_base_form(word):
+    # Try to get the base form using the WordNet lemmatizer
+    try:
+        synsets = wordnet.synsets(word)
+        if synsets:
+            return synsets[0].lemmas()[0].name()
+    except:
+        pass
+    
+    # Fallback case 1: If the word is already in base form, return it as is
+    if wordnet._morphy(word, 'n'):
+        return word
+    elif wordnet._morphy(word, 'v'):
+        return word
+    elif wordnet._morphy(word, 'a'):
+        return word
+    elif wordnet._morphy(word, 'r'):
+        return word
+    
+    # Fallback case 2: If the WordNet lemmatizer fails, just return the word as is
+    return word
+
+# Define a function to map the part of speech tags returned by NLTK to the tags used by WordNet lemmatizer
+def get_wordnet_pos(treebank_tag):
+    if treebank_tag.startswith('J'):
+        return wordnet.ADJ
+    elif treebank_tag.startswith('V'):
+        return wordnet.VERB
+    elif treebank_tag.startswith('N'):
+        return wordnet.NOUN
+    elif treebank_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return ''
+
+# Filter the tagged tokens to include only those with the same base form as the input word
+input_word = 'family'     ## INSERT INPUT WORD
+base_form = get_base_form(input_word)
+filtered_tokens = [token for token, tag in tagged_tokens if get_base_form(token.lower()) == base_form]
+
+# Create a frequency distribution of the filtered tokens
+freq_dist = FreqDist(filtered_tokens)
+
+# Create a DataFrame from the frequency distribution
+df = pd.DataFrame(list(freq_dist.items()), columns=['word', 'frequency'])
+
+# Add a column for the part of speech of each word
+pos_tags = []
+for word in df['word']:
+    base_form = get_base_form(word)
+    pos = None
+    for synset in wordnet.synsets(base_form):
+        for lemma in synset.lemmas():
+            if lemma.name() == base_form:
+                pos = lemma.synset().pos()
+                break
+        if pos:
+            break
+    if pos:
+        pos_tags.append(pos)
+    else:
+        # If the word is not found in WordNet, try to guess its part of speech using NLTK's pos_tag function
+        treebank_pos = nltk.pos_tag([word])[0][1]
+        wordnet_pos = get_wordnet_pos(treebank_pos)
+        pos_tags.append(wordnet_pos)
+df['pos_tag'] = pos_tags
+
+#
+
+# Save the dataframe to a CSV file
+df.to_csv("'/content/drive/My Drive/Digital_Humanities/TASKS_LISAN/task4.txt/T1.txt/output_.csv", index=False)
