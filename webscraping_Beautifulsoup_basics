@@ -1,3 +1,4 @@
+# Tutorial: https://www.youtube.com/watch?v=kPNHKrOqedI
 
 from bs4 import BeautifulSoup
 #pip install lxml
