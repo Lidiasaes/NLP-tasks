@@ -1,6 +1,6 @@
 # NLP-TASKS
 
-You will find different scripts to perform different tasks on the NLP domain. Mostly will be very basic scripts to use different libraries.
+You will find different scripts to perform various tasks on the NLP domain. Mostly will be very basic scripts to use different libraries.
 
   The files are usually named as: task_LLMname_dataset-used, or task, if it has not been performed on a certain dataset. 
 
